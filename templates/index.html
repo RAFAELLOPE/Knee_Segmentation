@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Filters</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
+    </head>
+    <body>
+       <form action = "http://localhost:5000/uploader" method = "POST" 
+       enctype="multipart/form-data">
+       
+        <table style="width:100%">
+            <tr align="left">
+                <th>
+                    <label for="parameters">Parameters</label>
+                </th>
+                <th>
+                    <label for="values">Values</label>
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <label for="compactness">Compactness</label>
+                </td>
+                <td>
+                    <input type = "number" name = "compactness">
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <label for="segments">Segments</label>
+                </td>
+                <td>
+                    <input type = "number" name = "segments">
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <label for="scale">Scale</label>
+                </td>
+                <td>
+                    <input type = "number" name = "scale">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="compactness">Image</label>
+                </td>
+                <td>
+                    <input type = "file" name= "input_file"/>
+                </td>
+
+            </tr>
+            <tr>
+                <td>
+                    <input type = "submit"/>
+                </td>
+            </tr>
+        </table>
+    
+       </form> 
+    </body>
+</html>
