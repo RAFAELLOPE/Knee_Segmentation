@@ -1,2 +1,4 @@
 #Do not track content of these folders
 __pycache__/
+*.ipynb
+*.png

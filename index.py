@@ -7,6 +7,7 @@ import numpy as np
 app = Flask(__name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOAD_FOLDER'] = 'C:\\temp'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 @app.route('/')
 def upload():
@@ -20,7 +21,6 @@ def uploader():
         #Form parameters
         compactness = int(request.form['compactness'])
         segments = int(request.form['segments'])
-        scale = float(request.form['scale'])
         img = request.files['input_file']
 
         #Save image
@@ -29,7 +29,7 @@ def uploader():
         img.save(file_path)
 
         img_arr = model.read_img(file_path)
-        segmentation = model.segment_image(img_arr, compactness, segments, scale)
+        segmentation = model.segment_image(img_arr, compactness, segments)
         seg_path = file_path = os.path.join(APP_ROOT, 'static', 'segmentation.png')
         segmentation.save(seg_path)
         

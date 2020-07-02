@@ -2,7 +2,7 @@ import SimpleITK as sitk
 import numpy as np 
 import pandas as pd 
 import numpy.fft as fp
-from skimage.segmentation import slic, mark_boundaries
+from skimage.segmentation import slic, find_boundaries
 from PIL import Image
 from skimage.transform import rescale
 from scipy import ndimage
@@ -31,16 +31,47 @@ def resample_image(img_arr, scale):
     img_resized = rescale(img_arr, scale= scale, anti_aliasing=True)
     return img_resized
 
-def segment_image(img_arr, compactness, segments, scale, sigma=3):
-    img_smoothed, _ = smooth_image(img_arr, sigma=sigma)
-    img_resized = resample_image(img_smoothed, scale=scale)
-    mean = img_resized.mean()
-    std = img_resized.std()
-    img_norm = (img_resized - mean) / std
-    img_norm = np.expand_dims(img_norm, axis=2)
-    img_norm = np.concatenate((img_norm, img_norm, img_norm), axis=2)
-    segments_slic = slic(img_norm, n_segments=segments, compactness=compactness, sigma=1)
-    boundaries = mark_boundaries(img_norm, segments_slic, color=(1,0,0))
-    segmentation = np.clip((boundaries*std) + mean, 0 , 255).astype(np.uint8)
-    im_pil = Image.fromarray(segmentation, 'RGB')
-    return im_pil
+
+def convert2rgb(img_arr):
+    img_clip = np.clip(img_arr, 0, 255).astype(np.uint8)
+    pil_img = Image.fromarray(img_clip)
+    pil_img = pil_img.convert('RGB')
+    img_rgb = np.asarray(pil_img).copy()
+    return img_rgb
+
+
+def overlay_images(background, boundaries):
+    channels = list()
+    cond = np.where(boundaries == 255)
+
+    for ch in range(background.shape[2]):
+        img_ch = background[...,ch]
+        if ch == 0:
+            img_ch[cond] = 255
+        else:
+            img_ch[cond] = 0
+        img_ch = np.expand_dims(img_ch, axis=2)
+        channels.append(img_ch)
+    
+    img_rgb = np.concatenate(tuple(channels), axis=2)
+    img_pil = Image.fromarray(img_rgb)
+    return img_pil
+
+
+def segment_image(img_arr, compactness, segments, sigma=3):
+    #Smooth image and resample
+    img_smoothed, _ = smooth_image(img_arr, sigma=1)
+    
+    #Get segmentation with Slic
+    segments_slic = slic(img_smoothed, n_segments=segments, compactness=compactness, sigma=3)
+
+    #Get boundaries from segmentation
+    boundaries = find_boundaries(segments_slic)
+    boundaries = 255*boundaries
+
+    #Convert to rgb for visualization
+    img_rgb = convert2rgb(img_arr)
+
+    #Overlay boundaries and rgb_img
+    img_pil = overlay_images(img_rgb, boundaries)
+    return img_pil
